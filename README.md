@@ -13,6 +13,11 @@ Fase 1 e estritamente read-only para BTG Pactual sandbox:
 - consulta de saldo;
 - consulta de extrato.
 
+Observacao apos leitura da documentacao BTG Empresas: `client_credentials` valida a autenticacao aplicacao-a-aplicacao, mas as APIs de banking, incluindo conta/saldo/extrato, exigem Authorization Code quando houver acesso a dados de conta. Portanto, a primeira prova tecnica deve separar:
+
+- token de aplicacao: `client_credentials`, usando `Client ID + Secret`;
+- token de banking: Authorization Code com consentimento, para contas/saldo/extrato.
+
 Pix pagamento, boletos, tributos, DDA, webhooks e qualquer operacao de escrita ficam fora da Fase 1. As interfaces existem apenas como direcao futura, sem implementacao ativa.
 
 ## Estrutura
@@ -56,11 +61,12 @@ Copie `.env.example` para `.env` e preencha localmente. O `.env`, certificados e
 BTG_CLIENT_ID=
 BTG_CLIENT_SECRET=
 BTG_ENV=sandbox
+BTG_SCOPE=
 BTG_CERT_PATH=
 BTG_KEY_PATH=
 ```
 
-`BTG_CERT_PATH` e `BTG_KEY_PATH` sao opcionais. No app BTG atual, o fluxo esperado e `client_credentials` com `Client ID + Secret`, sem certificado/mTLS.
+`BTG_CERT_PATH` e `BTG_KEY_PATH` sao opcionais. No app BTG atual, o fluxo esperado nao usa certificado/mTLS.
 
 ## Discovery BTG
 

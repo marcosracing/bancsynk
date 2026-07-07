@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, Tuple
 
 import requests
+from requests.auth import HTTPBasicAuth
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,15 +19,15 @@ log = logging.getLogger("bancsynk.btg.auth")
 BTG_ENV = os.environ.get("BTG_ENV", "sandbox")
 BTG_BASE_URL = os.environ.get(
     "BTG_BASE_URL",
-    "https://api.sandbox.btgpactual.com"
+    "https://api.sandbox.empresas.btgpactual.com"
     if BTG_ENV == "sandbox"
     else "https://api.empresas.btgpactual.com",
 )
 BTG_AUTH_URL = os.environ.get(
     "BTG_AUTH_URL",
-    "https://id.sandbox.btgpactual.com/auth/realms/btg/protocol/openid-connect/token"
+    "https://id.sandbox.btgpactual.com/oauth2/token"
     if BTG_ENV == "sandbox"
-    else "https://id.empresas.btgpactual.com/auth/realms/btg/protocol/openid-connect/token",
+    else "https://id.btgpactual.com/oauth2/token",
 )
 
 
@@ -38,6 +39,7 @@ class BTGAuth:
         self.client_secret = os.environ.get("BTG_CLIENT_SECRET", "")
         self.cert_path = os.path.expanduser(os.environ.get("BTG_CERT_PATH", ""))
         self.key_path = os.path.expanduser(os.environ.get("BTG_KEY_PATH", ""))
+        self.scope = os.environ.get("BTG_SCOPE", "")
         self._token: Optional[str] = None
         self._token_exp = 0.0
 
@@ -67,11 +69,8 @@ class BTGAuth:
 
         resp = requests.post(
             BTG_AUTH_URL,
-            data={
-                "grant_type": "client_credentials",
-                "client_id": self.client_id,
-                "client_secret": self.client_secret,
-            },
+            data={"grant_type": "client_credentials", "scope": self.scope},
+            auth=HTTPBasicAuth(self.client_id, self.client_secret),
             cert=self.cert,
             timeout=15,
         )
