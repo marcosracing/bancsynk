@@ -61,6 +61,7 @@ Copie `.env.example` para `.env` e preencha localmente. O `.env`, certificados e
 BTG_CLIENT_ID=
 BTG_CLIENT_SECRET=
 BTG_ENV=sandbox
+BTG_REDIRECT_URI=https://localhost.com
 BTG_SCOPE=
 BTG_CERT_PATH=
 BTG_KEY_PATH=
@@ -77,6 +78,24 @@ python3 scripts/discover_btg.py
 ```
 
 O resultado e salvo em `bancsynk/docs/discovery_btg.json`, ignorado pelo git por poder conter payload bancario sensivel.
+
+## Authorization Code
+
+Para banking, gere a URL de consentimento:
+
+```bash
+python3 scripts/build_btg_auth_url.py
+```
+
+Abra a URL no navegador, faca login/consentimento e copie o `code` retornado na `redirect_uri`.
+
+Depois troque o codigo por token:
+
+```bash
+python3 scripts/exchange_btg_code.py --code "CODIGO_RETORNADO"
+```
+
+O token e salvo em `bancsynk/docs/btg_tokens.local.json`, ignorado pelo git.
 
 ## Contrato com CtrlOne
 
