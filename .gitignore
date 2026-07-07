@@ -1,0 +1,28 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+*.egg-info/
+
+.env
+.env.*
+!.env.example
+
+# Credenciais e certificados bancarios nunca entram no git.
+bancsynk/adapters/*/cert/*
+!bancsynk/adapters/*/cert/.gitkeep
+*.crt
+*.cer
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Discoveries podem conter payload bancario sensivel.
+bancsynk/docs/discovery_*.json
+bancsynk/docs/portal/*
+!bancsynk/docs/portal/.gitkeep
