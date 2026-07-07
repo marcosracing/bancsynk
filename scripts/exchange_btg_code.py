@@ -16,8 +16,11 @@ def main() -> int:
 
     token = exchange_code(args.code)
     output = Path("bancsynk/docs/btg_tokens.local.json")
+    output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(token, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"Token salvo em {output}")
+    print(f"access_token={'sim' if token.get('access_token') else 'nao'}")
+    print(f"refresh_token={'sim' if token.get('refresh_token') else 'nao'}")
     print(f"scope={token.get('scope', '')}")
     print(f"expires_in={token.get('expires_in', '')}")
     return 0

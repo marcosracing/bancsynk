@@ -1,0 +1,561 @@
+{
+  "current_user": "RLOGIX_GR",
+  "tables": {
+    "CONTA_BANCARIA_EMPRESA": [
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "COMPANY_ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "BANCO_CODIGO",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "BANCO_NOME",
+        "data_type": "VARCHAR2",
+        "data_length": 100,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "AGENCIA",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "CONTA",
+        "data_type": "VARCHAR2",
+        "data_length": 20,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "TIPO_CONTA",
+        "data_type": "VARCHAR2",
+        "data_length": 5,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "TITULAR_NOME",
+        "data_type": "VARCHAR2",
+        "data_length": 200,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "PIX_TIPO",
+        "data_type": "VARCHAR2",
+        "data_length": 20,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "PIX_CHAVE",
+        "data_type": "VARCHAR2",
+        "data_length": 200,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "SALDO_INICIAL",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "SALDO_INICIAL_DT",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "SALDO_MINIMO",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "BANKSYNC_ATIVO",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "CNAB_LAYOUT",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "CONVENIO_BANCO",
+        "data_type": "VARCHAR2",
+        "data_length": 50,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "SITUACAO",
+        "data_type": "VARCHAR2",
+        "data_length": 15,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "OBSERVACAO",
+        "data_type": "VARCHAR2",
+        "data_length": 1000,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "CRIADO_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "CONTA_BANCARIA_EMPRESA",
+        "column_name": "ATUALIZADO_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "N"
+      }
+    ],
+    "FATURAS": [
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "COMPANY_ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "NATUREZA",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "ORIGEM",
+        "data_type": "VARCHAR2",
+        "data_length": 30,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "STATUS",
+        "data_type": "VARCHAR2",
+        "data_length": 30,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "VERSAO",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "PESSOA_DOC",
+        "data_type": "VARCHAR2",
+        "data_length": 14,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "PESSOA_NOME",
+        "data_type": "VARCHAR2",
+        "data_length": 200,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "MOTORISTA_ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "PERIODO_INICIO",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "PERIODO_FIM",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "NUMERO_FATURA",
+        "data_type": "VARCHAR2",
+        "data_length": 50,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "SERIE",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "EMISSAO",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "VENCIMENTO",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "COMPETENCIA",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CONDICAO_PGTO",
+        "data_type": "VARCHAR2",
+        "data_length": 100,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "VALOR_TOTAL",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "MOEDA",
+        "data_type": "VARCHAR2",
+        "data_length": 3,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TIPO_COMPROVANTE",
+        "data_type": "VARCHAR2",
+        "data_length": 20,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "DEDUTIBILIDADE",
+        "data_type": "VARCHAR2",
+        "data_length": 20,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "RISCO_FISCAL",
+        "data_type": "VARCHAR2",
+        "data_length": 10,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "ORIGEM_REF",
+        "data_type": "VARCHAR2",
+        "data_length": 100,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "RAW_PAYLOAD",
+        "data_type": "CLOB",
+        "data_length": 4000,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CTRL_APROVADA_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CTRL_APROVADA_POR",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CTRL_DEVOLVIDA_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CTRL_DEVOLVIDA_POR",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CTRL_MOTIVO_DEVOLUCAO",
+        "data_type": "VARCHAR2",
+        "data_length": 500,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_APROVADA_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_APROVADA_POR",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_BANCO_CONTA",
+        "data_type": "VARCHAR2",
+        "data_length": 100,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_AGENDADA_PARA",
+        "data_type": "DATE",
+        "data_length": 7,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_PAGA_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_PAGA_POR",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "TESO_MOTIVO_DEVOLUCAO",
+        "data_type": "VARCHAR2",
+        "data_length": 500,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_NOSSO_NUMERO",
+        "data_type": "VARCHAR2",
+        "data_length": 50,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_COBRANCA_TIPO",
+        "data_type": "VARCHAR2",
+        "data_length": 20,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_RECEBIDO_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_RECEBIDO_POR",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_VALOR_RECEBIDO",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "AR_MOTIVO_DEVOLUCAO",
+        "data_type": "VARCHAR2",
+        "data_length": 500,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "LANCAMENTO_ID",
+        "data_type": "NUMBER",
+        "data_length": 22,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "CRIADO_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "ATUALIZADO_EM",
+        "data_type": "TIMESTAMP(6)",
+        "data_length": 11,
+        "nullable": "N"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "NSU",
+        "data_type": "VARCHAR2",
+        "data_length": 50,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "COMPROVANTE",
+        "data_type": "VARCHAR2",
+        "data_length": 200,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "OBS_CTRL",
+        "data_type": "VARCHAR2",
+        "data_length": 1000,
+        "nullable": "Y"
+      },
+      {
+        "owner": "RLOGIX_GR",
+        "table_name": "FATURAS",
+        "column_name": "OBS_TESO",
+        "data_type": "VARCHAR2",
+        "data_length": 1000,
+        "nullable": "Y"
+      }
+    ]
+  }
+}

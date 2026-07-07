@@ -25,5 +25,6 @@ bancsynk/adapters/*/cert/*
 # Discoveries podem conter payload bancario sensivel.
 bancsynk/docs/discovery_*.json
 bancsynk/docs/*token*.json
+bancsynk/docs/btg_tokens.local.json
 bancsynk/docs/portal/*
 !bancsynk/docs/portal/.gitkeep
