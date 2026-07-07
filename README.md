@@ -55,10 +55,12 @@ Copie `.env.example` para `.env` e preencha localmente. O `.env`, certificados e
 ```text
 BTG_CLIENT_ID=
 BTG_CLIENT_SECRET=
-BTG_CERT_PATH=bancsynk/adapters/btg/cert/btg.crt
-BTG_KEY_PATH=bancsynk/adapters/btg/cert/btg.key
 BTG_ENV=sandbox
+BTG_CERT_PATH=
+BTG_KEY_PATH=
 ```
+
+`BTG_CERT_PATH` e `BTG_KEY_PATH` sao opcionais. No app BTG atual, o fluxo esperado e `client_credentials` com `Client ID + Secret`, sem certificado/mTLS.
 
 ## Discovery BTG
 
