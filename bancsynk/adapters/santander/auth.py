@@ -19,14 +19,19 @@ from __future__ import annotations
 import logging
 import os
 from typing import Optional
+from urllib.parse import urlencode
 
 log = logging.getLogger("bancsynk.santander.auth")
 
 BANCO_CODIGO = "033"
 
+DEFAULT_SCOPE = "ACCLIST.READ ACCDET.READ ACCTRAN.READ"
+
 DEFAULTS = {
+    "AUTHORIZE_URL": "https://api-sandbox.santander.com/santander/external/oauth/authorize",
     "AUTH_URL": "https://api-sandbox.santander.com/santander/external/oauth/token",
     "COUNTRY": "BR",
+    "SCOPE": DEFAULT_SCOPE,
 }
 
 
@@ -107,6 +112,97 @@ class SantanderAuth:
             "has_client_id": True,
             "has_secret": True,
             "has_token": True,
+        }
+
+    # ── Authorization Code: URL de consentimento ────────────────────────────
+    def build_authorize_url(
+        self,
+        redirect_uri: str,
+        scope: Optional[str] = None,
+        state: Optional[str] = None,
+    ) -> str:
+        """Monta URL de consentimento Santander (country=BR obrigatorio)."""
+        cid = self._resolve_company()
+        if not self.client_id:
+            raise ValueError(
+                f"Santander 033: CLIENT_ID ausente em BANCSYNC_{BANCO_CODIGO}_{cid or '<COMPANY_ID>'}_CLIENT_ID"
+            )
+        authorize_url = self.get("AUTHORIZE_URL")
+        if not authorize_url:
+            raise ValueError("Santander 033: AUTHORIZE_URL nao configurado")
+        params = {
+            "client_id": self.client_id,
+            "response_type": "code",
+            "scope": scope or self.get("SCOPE", DEFAULT_SCOPE),
+            "country": self.get("COUNTRY", "BR"),
+            "redirect_uri": redirect_uri,
+        }
+        if state:
+            params["state"] = state
+        return f"{authorize_url}?{urlencode(params)}"
+
+    # ── Authorization Code: troca de code por tokens ────────────────────────
+    def exchange_code(
+        self,
+        code: str,
+        redirect_uri: str,
+        scope: Optional[str] = None,
+    ) -> dict:
+        """Troca authorization code por access/refresh token via Basic Auth.
+
+        Salva ACCESS_TOKEN e REFRESH_TOKEN via save_credential (nunca no Oracle).
+        Retorna apenas metadados nao-sensiveis (flags, expires_in, token_type, scope).
+        """
+        import requests
+        from requests.auth import HTTPBasicAuth
+
+        from bancsynk.config import save_credential
+
+        cid = self._resolve_company()
+        if cid is None:
+            raise ValueError(
+                "Santander 033: company_id indefinido — passe company_id ao instanciar SantanderAuth"
+            )
+        if not self.client_id or not self.client_secret:
+            raise ValueError(
+                "Santander 033: CLIENT_ID/CLIENT_SECRET ausentes no .env"
+            )
+        auth_url = self.get("AUTH_URL")
+        if not auth_url:
+            raise ValueError("Santander 033: AUTH_URL nao configurado")
+        body = {
+            "grant_type": "authorization_code",
+            "code": code,
+            "redirect_uri": redirect_uri,
+            "country": self.get("COUNTRY", "BR"),
+            "scope": scope or self.get("SCOPE", DEFAULT_SCOPE),
+        }
+        resp = requests.post(
+            auth_url,
+            data=body,
+            auth=HTTPBasicAuth(self.client_id, self.client_secret),
+            timeout=20,
+        )
+        resp.raise_for_status()
+        tokens = resp.json() or {}
+
+        access = tokens.get("access_token") or ""
+        refresh = tokens.get("refresh_token") or ""
+        if access:
+            save_credential(BANCO_CODIGO, cid, "ACCESS_TOKEN", access)
+        if refresh:
+            save_credential(BANCO_CODIGO, cid, "REFRESH_TOKEN", refresh)
+        log.info("Santander 033: tokens salvos para company_id=%s", cid)
+
+        return {
+            "ok": True,
+            "banco": BANCO_CODIGO,
+            "company_id": cid,
+            "has_access_token": bool(access),
+            "has_refresh_token": bool(refresh),
+            "expires_in": tokens.get("expires_in"),
+            "token_type": tokens.get("token_type"),
+            "scope": tokens.get("scope"),
         }
 
     # ── HTTP GET usando token existente ─────────────────────────────────────

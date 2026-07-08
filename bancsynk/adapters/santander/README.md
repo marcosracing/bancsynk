@@ -45,3 +45,28 @@ result = adapter.auth_check()
 - Com token → `{ok: True, msg: "... credenciais e token presentes."}`
 
 Token nunca é logado nem retornado por inteiro.
+
+## Authorization Code
+
+### `SantanderAuth.build_authorize_url(redirect_uri, scope=None, state=None)`
+Retorna URL do endpoint `/oauth/authorize` com:
+- `response_type=code`
+- `client_id`
+- `scope` (default: `ACCLIST.READ ACCDET.READ ACCTRAN.READ`)
+- `country=BR` — obrigatório no Santander Open Finance BR
+- `redirect_uri`
+- `state` (opcional)
+
+### `SantanderAuth.exchange_code(code, redirect_uri, scope=None)`
+- `POST` em `AUTH_URL` (default sandbox `/oauth/token`).
+- `Authorization: Basic base64(client_id:client_secret)` via `requests.auth.HTTPBasicAuth`.
+- Body: `grant_type=authorization_code&code&redirect_uri&country&scope`.
+- `ACCESS_TOKEN` e `REFRESH_TOKEN` salvos via `save_credential("033", company_id, ...)` (jamais no Oracle).
+- Retorno **sem tokens brutos**: `{ok, banco, company_id, has_access_token, has_refresh_token, expires_in, token_type, scope}`.
+
+### Uso via gateway (CtrlOne)
+```python
+BancSynk().gerar_url_consentimento("033", company_id=2, redirect_uri="...", scope="")
+BancSynk().trocar_code("033", company_id=2, code="AUTHCODE", redirect_uri="...")
+```
+O gateway detecta banco `033`/`santander` e delega para `SantanderAuth`. BTG mantém fluxo próprio.

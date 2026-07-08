@@ -90,9 +90,20 @@ class BancSynk:
             }
         return {"ok": True, "integracoes": bancos}
 
+    @staticmethod
+    def _is_santander(banco: str) -> bool:
+        return str(banco).lower().strip() in {"033", "santander"}
+
     def gerar_url_consentimento(
         self, banco: str, company_id, redirect_uri: str, scope: str
     ) -> str:
+        if self._is_santander(banco):
+            from bancsynk.adapters.santander.auth import SantanderAuth
+
+            return SantanderAuth(company_id=company_id).build_authorize_url(
+                redirect_uri=redirect_uri, scope=scope or None
+            )
+
         from bancsynk.config import env_key, get_all_env, get_credential
 
         env = get_all_env()
@@ -113,6 +124,13 @@ class BancSynk:
     def trocar_code(
         self, banco: str, company_id, code: str, redirect_uri: str
     ) -> dict:
+        if self._is_santander(banco):
+            from bancsynk.adapters.santander.auth import SantanderAuth
+
+            return SantanderAuth(company_id=company_id).exchange_code(
+                code=code, redirect_uri=redirect_uri
+            )
+
         import requests
 
         from bancsynk.config import (
