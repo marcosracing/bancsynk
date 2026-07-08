@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Optional
+
 from bancsynk.adapters.base import BankAdapter
 from bancsynk.adapters.btg.auth import BTGAuth
 
@@ -13,8 +15,9 @@ class BTGReadOnlyAdapter(BankAdapter):
     banco_nome = "BTG Pactual"
     read_only = True
 
-    def __init__(self, auth: BTGAuth | None = None) -> None:
-        self.auth = auth or BTGAuth()
+    def __init__(self, company_id: Optional[str] = None, auth: BTGAuth | None = None) -> None:
+        self.company_id: Optional[str] = str(company_id) if company_id is not None else None
+        self.auth = auth or BTGAuth(company_id=self.company_id)
 
     def auth_check(self) -> dict:
         return self.auth.check()

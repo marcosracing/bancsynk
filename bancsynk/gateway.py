@@ -30,6 +30,7 @@ class BancSynk:
     def _register_btg(self) -> None:
         adapter = BTGReadOnlyAdapter()
         self._adapters[adapter.banco_codigo] = adapter
+        self._adapters["208"] = adapter
         log.info("BancSynk: adaptador BTG registrado em modo read-only")
 
     def _register_santander(self) -> None:
@@ -94,6 +95,10 @@ class BancSynk:
     def _is_santander(banco: str) -> bool:
         return str(banco).lower().strip() in {"033", "santander"}
 
+    @staticmethod
+    def _is_btg(banco: str) -> bool:
+        return str(banco).lower().strip() in {"208", "btg"}
+
     def gerar_url_consentimento(
         self, banco: str, company_id, redirect_uri: str, scope: str
     ) -> str:
@@ -106,6 +111,8 @@ class BancSynk:
 
         from bancsynk.config import env_key, get_all_env, get_credential
 
+        if self._is_btg(banco):
+            banco = "208"
         env = get_all_env()
         authorize_url = env.get(env_key(banco, company_id, "AUTHORIZE_URL")) or env.get(
             "BTG_AUTHORIZE_URL", ""
@@ -132,6 +139,7 @@ class BancSynk:
             )
 
         import requests
+        from requests.auth import HTTPBasicAuth
 
         from bancsynk.config import (
             env_key,
@@ -141,20 +149,23 @@ class BancSynk:
         )
 
         env = get_all_env()
+        if self._is_btg(banco):
+            banco = "208"
         auth_url = env.get(env_key(banco, company_id, "AUTH_URL")) or env.get(
             "BTG_AUTH_URL", ""
         )
         client_id = get_credential(banco, company_id, "CLIENT_ID")
         secret = get_credential(banco, company_id, "CLIENT_SECRET")
+        if not auth_url or not client_id or not secret:
+            raise ValueError("AUTH_URL, CLIENT_ID ou CLIENT_SECRET nao configurados no .env")
         resp = requests.post(
             auth_url,
             data={
                 "grant_type": "authorization_code",
-                "client_id": client_id,
-                "client_secret": secret,
                 "code": code,
                 "redirect_uri": redirect_uri,
             },
+            auth=HTTPBasicAuth(client_id, secret),
             timeout=15,
         )
         resp.raise_for_status()
@@ -164,4 +175,13 @@ class BancSynk:
         if tokens.get("refresh_token"):
             save_credential(banco, company_id, "REFRESH_TOKEN", tokens["refresh_token"])
         log.info("BancSynk: token %s/%s salvo no .env", banco, company_id)
-        return tokens
+        return {
+            "ok": True,
+            "banco": banco,
+            "company_id": str(company_id),
+            "has_access_token": bool(tokens.get("access_token")),
+            "has_refresh_token": bool(tokens.get("refresh_token")),
+            "expires_in": tokens.get("expires_in"),
+            "token_type": tokens.get("token_type"),
+            "scope": tokens.get("scope"),
+        }
