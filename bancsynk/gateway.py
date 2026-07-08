@@ -8,6 +8,7 @@ from urllib.parse import urlencode
 
 from bancsynk.adapters.base import BankAdapter
 from bancsynk.adapters.btg.accounts import BTGReadOnlyAdapter
+from bancsynk.adapters.santander.accounts import SantanderReadOnlyAdapter
 
 log = logging.getLogger("bancsynk.gateway")
 
@@ -19,21 +20,37 @@ class BancSynk:
     adicionadas em fase propria, com ADR/contrato e controles de aprovacao.
     """
 
-    def __init__(self, enable_btg: bool = True):
+    def __init__(self, enable_btg: bool = True, enable_santander: bool = True):
         self._adapters: Dict[str, BankAdapter] = {}
         if enable_btg:
             self._register_btg()
+        if enable_santander:
+            self._register_santander()
 
     def _register_btg(self) -> None:
         adapter = BTGReadOnlyAdapter()
         self._adapters[adapter.banco_codigo] = adapter
         log.info("BancSynk: adaptador BTG registrado em modo read-only")
 
-    def get_adapter(self, banco: str) -> BankAdapter:
+    def _register_santander(self) -> None:
+        adapter = SantanderReadOnlyAdapter()
+        self._adapters[adapter.banco_codigo] = adapter
+        self._adapters["santander"] = adapter
+        log.info("BancSynk: adaptador Santander registrado em modo read-only")
+
+    def get_adapter(self, banco: str, company_id=None) -> BankAdapter:
         code = banco.lower().strip()
         if code not in self._adapters:
             raise ValueError(f"Banco '{banco}' nao configurado no BancSynk")
-        return self._adapters[code]
+        adapter = self._adapters[code]
+        if company_id is not None:
+            cls = type(adapter)
+            try:
+                return cls(company_id=company_id)
+            except TypeError:
+                # Adapter nao aceita company_id (ex.: BTG global).
+                return adapter
+        return adapter
 
     def get_contas(self, banco: str) -> list:
         return self.get_adapter(banco).get_contas()
