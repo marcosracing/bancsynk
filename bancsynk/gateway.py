@@ -114,8 +114,10 @@ class BancSynk:
         if self._is_btg(banco):
             banco = "208"
         env = get_all_env()
-        authorize_url = env.get(env_key(banco, company_id, "AUTHORIZE_URL")) or env.get(
-            "BTG_AUTHORIZE_URL", ""
+        authorize_url = (
+            get_credential(banco, company_id, "AUTHORIZE_URL")
+            or env.get(env_key(banco, company_id, "AUTHORIZE_URL"))
+            or env.get("BTG_AUTHORIZE_URL", "")
         )
         client_id = get_credential(banco, company_id, "CLIENT_ID")
         if not authorize_url or not client_id:
@@ -151,8 +153,10 @@ class BancSynk:
         env = get_all_env()
         if self._is_btg(banco):
             banco = "208"
-        auth_url = env.get(env_key(banco, company_id, "AUTH_URL")) or env.get(
-            "BTG_AUTH_URL", ""
+        auth_url = (
+            get_credential(banco, company_id, "AUTH_URL")
+            or env.get(env_key(banco, company_id, "AUTH_URL"))
+            or env.get("BTG_AUTH_URL", "")
         )
         client_id = get_credential(banco, company_id, "CLIENT_ID")
         secret = get_credential(banco, company_id, "CLIENT_SECRET")
