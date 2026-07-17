@@ -69,6 +69,12 @@ class BancSynk:
     ) -> dict:
         return self.get_adapter(banco).get_extrato(conta_id, data_ini, data_fim, pagina)
 
+    def get_dda(self, banco: str, company_id=None, **filtros) -> dict:
+        """Delega para o adapter. Levanta NotImplementedError se o adapter
+        não sobrescreveu get_dda (bancos sem suporte a DDA)."""
+        adapter = self.get_adapter(banco, company_id=company_id)
+        return adapter.get_dda(**filtros)
+
     # ── Interface CtrlOne — multiempresa via BANCSYNC_{banco}_{company_id}_* ─
     def health(self) -> dict:
         from bancsynk.config import get_all_env, has_credential
