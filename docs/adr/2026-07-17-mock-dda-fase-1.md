@@ -5,7 +5,7 @@
 **Precedência:** ADR-0042 (BancSynk)
 
 ## Contexto
-A integração real com a API DDA do BTG (`GET /direct-debit/debits`) depende de:
+A integração real com a API DDA do BTG (`GET /{companyId}/banking/direct-debit/debits`) depende de:
 
 - credenciais Client ID/Secret ativas por CNPJ,
 - scope `authorized-direct-debits.readonly` habilitado no BTG Id,
@@ -31,7 +31,7 @@ resposta estruturalmente idêntica ao contrato oficial.
 
 ## Contrato coberto (oficial)
 - `POST /oauth2/token`: grant_type ∈ {`authorization_code`, `refresh_token`}
-- `GET /direct-debit/debits`: query params `pageNumber`, `pageSize`,
+- `GET /{companyId}/banking/direct-debit/debits`: query params `pageNumber`, `pageSize`,
   `status`, `minDueDate`, `maxDueDate`, `payeeDocument`, `payeeBankCode`,
   `hidden`, `minAmount`, `maxAmount`.
 - Envelope: `{ "data": [...], "links": { "next": ..., "previous": ... } }`.

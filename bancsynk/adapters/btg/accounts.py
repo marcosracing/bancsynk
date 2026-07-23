@@ -68,7 +68,7 @@ class BTGReadOnlyAdapter(BankAdapter):
         all_pages: bool = False,
     ) -> Dict[str, Any]:
         """Consulta DDAs no BTG. Contrato oficial:
-        GET /direct-debit/debits?pageNumber&pageSize&status&minDueDate&maxDueDate&...
+        GET /{companyId}/banking/direct-debit/debits?pageNumber&pageSize&status&minDueDate&maxDueDate&...
 
         Retorna:
             {
@@ -112,7 +112,10 @@ class BTGReadOnlyAdapter(BankAdapter):
         previous_link: Optional[str] = None
         while True:
             params["pageNumber"] = current_page
-            payload = self.auth.get("/direct-debit/debits", params=params) or {}
+            payload = self.auth.get(
+                "/{companyId}/banking/direct-debit/debits",
+                params=params,
+            ) or {}
             data = payload.get("data") or []
             links = payload.get("links") or {}
             next_link = links.get("next") if isinstance(links, dict) else None

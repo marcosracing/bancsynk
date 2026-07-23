@@ -4,7 +4,7 @@ para o sandbox real.
 
 Endpoints implementados:
   POST /oauth2/token           — grant_type=authorization_code | refresh_token
-  GET  /direct-debit/debits    — filtros, paginação, envelope oficial
+  GET  /{companyId}/banking/direct-debit/debits — filtros, paginação, envelope oficial
 
 Contrato: developers.empresas.btgpactual.com. Nenhum campo inventado.
 
@@ -315,7 +315,7 @@ class BTGMockServer:
         }
         return Response(json.dumps(body), status=200, mimetype="application/json")
 
-    # ── /direct-debit/debits ────────────────────────────────────────────────
+    # ── /{companyId}/banking/direct-debit/debits ────────────────────────────
     def _handle_dda(self, request) -> Any:
         from werkzeug.wrappers import Response
         self.state.dda_requests += 1
@@ -354,13 +354,24 @@ class BTGMockServer:
             min_amount=args.get("minAmount"),
             max_amount=args.get("maxAmount"),
         )
-        base_url = f"{request.host_url.rstrip('/')}/direct-debit/debits"
+        company_id = request.path.strip("/").split("/")[0]
+        base_url = (
+            f"{request.host_url.rstrip('/')}/"
+            f"{company_id}/banking/direct-debit/debits"
+        )
         envelope = _paginate(filtered, page_number, page_size, base_url, request.query_string.decode("latin-1"))
         return Response(json.dumps(envelope), status=200, mimetype="application/json")
 
     def install(self) -> None:
         self.server.expect_request("/oauth2/token", method="POST").respond_with_handler(self._handle_token)
-        self.server.expect_request("/direct-debit/debits", method="GET").respond_with_handler(self._handle_dda)
+        self.server.expect_request(
+            "/1/banking/direct-debit/debits",
+            method="GET",
+        ).respond_with_handler(self._handle_dda)
+        self.server.expect_request(
+            "/30306294000145/banking/direct-debit/debits",
+            method="GET",
+        ).respond_with_handler(self._handle_dda)
 
     # ── Helpers para os testes ───────────────────────────────────────────────
     def base_url(self) -> str:
