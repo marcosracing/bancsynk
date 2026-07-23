@@ -24,21 +24,30 @@ class BTGReadOnlyAdapter(BankAdapter):
         return self.auth.check()
 
     def get_contas(self) -> list:
-        data = self.auth.get("/v2/accounts")
+        data = self.auth.get("/{companyId}/banking/accounts")
         if isinstance(data, list):
-            return data
-        return data.get("accounts") or data.get("contas") or [data]
+            rows: list = []
+            for item in data:
+                if isinstance(item, dict) and isinstance(item.get("data"), list):
+                    rows.extend(item["data"])
+                else:
+                    rows.append(item)
+            return rows
+        if isinstance(data, dict):
+            return data.get("accounts") or data.get("contas") or data.get("data") or [data]
+        return []
 
     def get_saldo(self, conta_id: str) -> dict:
-        return self.auth.get("/v2/accounts/balance", params={"accountId": conta_id})
+        return self.auth.get(f"/{{companyId}}/banking/accounts/{conta_id}/balances")
 
     def get_extrato(self, conta_id: str, data_ini: str, data_fim: str, pagina: int = 1) -> dict:
         return self.auth.get(
-            "/v2/accounts/statement",
+            f"/{{companyId}}/banking/accounts/{conta_id}/statements",
             params={
-                "accountId": conta_id,
                 "startDate": data_ini,
                 "endDate": data_fim,
+                "type": "simple",
+                "pageSize": 100,
                 "page": pagina,
             },
         )

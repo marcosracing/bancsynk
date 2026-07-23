@@ -55,6 +55,51 @@ def test_btg_auth_check_with_credentials_without_token(monkeypatch):
     assert "consentimento pendente" in result["msg"]
 
 
+def test_btg_accounts_uses_official_banking_paths():
+    from bancsynk.adapters.btg.accounts import BTGReadOnlyAdapter
+
+    calls = []
+
+    class FakeAuth:
+        def get(self, path, params=None):
+            calls.append((path, params or {}))
+            return {"accounts": []}
+
+    adapter = BTGReadOnlyAdapter(company_id=1, auth=FakeAuth())
+
+    adapter.get_contas()
+    adapter.get_saldo("CNPJ-208-50-5332205")
+    adapter.get_extrato("CNPJ-208-50-5332205", "2026-07-01", "2026-07-23")
+
+    assert calls[0] == ("/{companyId}/banking/accounts", {})
+    assert calls[1] == (
+        "/{companyId}/banking/accounts/CNPJ-208-50-5332205/balances",
+        {},
+    )
+    assert calls[2] == (
+        "/{companyId}/banking/accounts/CNPJ-208-50-5332205/statements",
+        {
+            "startDate": "2026-07-01",
+            "endDate": "2026-07-23",
+            "type": "simple",
+            "pageSize": 100,
+            "page": 1,
+        },
+    )
+
+
+def test_btg_accounts_unwraps_data_envelope():
+    from bancsynk.adapters.btg.accounts import BTGReadOnlyAdapter
+
+    class FakeAuth:
+        def get(self, path, params=None):
+            return [{"data": [{"accountId": "A-1"}]}]
+
+    adapter = BTGReadOnlyAdapter(company_id=1, auth=FakeAuth())
+
+    assert adapter.get_contas() == [{"accountId": "A-1"}]
+
+
 def test_write_operations_are_blocked_in_phase_1():
     adapter = BancSynk().get_adapter("btg")
 
