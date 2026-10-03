@@ -119,10 +119,16 @@ class BTGReadOnlyAdapter(BankAdapter):
         previous_link: Optional[str] = None
         while True:
             params["pageNumber"] = current_page
-            payload = self.auth.get(
-                "/{companyId}/banking/direct-debit/debits",
-                params=params,
-            ) or {}
+            caminho = "/{companyId}/banking/direct-debit/debits"
+            if self.auth.ambiente == "sandbox":
+                # O sandbox (Wiremock) exige x-response para escolher a resposta.
+                resp = self.auth.request(
+                    "GET", caminho, params=params, headers={"x-response": "success"}
+                )
+                resp.raise_for_status()
+                payload = resp.json() or {}
+            else:
+                payload = self.auth.get(caminho, params=params) or {}
             data = payload.get("data") or []
             links = payload.get("links") or {}
             next_link = links.get("next") if isinstance(links, dict) else None

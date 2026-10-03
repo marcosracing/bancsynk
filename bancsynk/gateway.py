@@ -58,6 +58,12 @@ class BancSynk:
                 return adapter
         return adapter
 
+    def get_cobranca(self, company_id=None, credenciais=None):
+        """Adaptador de cobranca (boleto) do BTG; unico com escrita."""
+        from bancsynk.adapters.btg.collections import BTGCobrancaAdapter
+
+        return BTGCobrancaAdapter(company_id=company_id, credenciais=credenciais)
+
     def get_contas(self, banco: str) -> list:
         return self.get_adapter(banco).get_contas()
 
