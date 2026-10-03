@@ -116,8 +116,9 @@ def test_authorize_url_uses_authorization_code(monkeypatch):
     monkeypatch.setenv("BTG_REDIRECT_URI", "https://localhost.com")
     monkeypatch.setenv("BTG_SCOPE", "openid empresas.btgpactual.com/accounts.readonly")
 
-    url = get_authorize_url()
+    url = get_authorize_url("estado-1")
 
+    assert "state=estado-1" in url
     assert "response_type=code" in url
     assert "client_id=client-123" in url
     assert "scope=openid+" in url
@@ -136,6 +137,7 @@ def test_btg_gateway_gerar_url_consentimento_by_bank_code(monkeypatch):
         company_id=1,
         redirect_uri="https://localhost.com",
         scope="openid empresas.btgpactual.com/accounts.readonly",
+        state="estado-btg",
     )
 
     assert url.startswith("https://id.sandbox.btgpactual.com/oauth2/authorize?")
@@ -249,7 +251,8 @@ def test_santander_gateway_gerar_url_consentimento(monkeypatch):
     monkeypatch.setenv("BANCSYNC_033_2_CLIENT_ID", "sant-client-2")
 
     url = BancSynk().gerar_url_consentimento(
-        "033", company_id=2, redirect_uri="https://localhost.com", scope=""
+        "033", company_id=2, redirect_uri="https://localhost.com", scope="",
+        state="estado-033",
     )
 
     assert url.startswith("https://api-sandbox.santander.com/santander/external/oauth/authorize?")
@@ -265,7 +268,8 @@ def test_santander_gateway_alias_gerar_url_consentimento(monkeypatch):
     monkeypatch.setenv("BANCSYNC_033_2_CLIENT_ID", "sant-client-2")
 
     url = BancSynk().gerar_url_consentimento(
-        "santander", company_id=2, redirect_uri="https://localhost.com", scope=""
+        "santander", company_id=2, redirect_uri="https://localhost.com", scope="",
+        state="estado-033",
     )
 
     assert "response_type=code" in url
@@ -369,3 +373,19 @@ def test_santander_exchange_code_requires_client_credentials(monkeypatch):
         assert "CLIENT_ID" in str(exc) or "CLIENT_SECRET" in str(exc)
     else:
         raise AssertionError("exchange_code sem credenciais deveria falhar com ValueError")
+
+
+
+def test_consentimento_sem_state_e_recusado(monkeypatch):
+    # Sem state o code de volta não se amarra a quem pediu (CSRF).
+    import pytest
+    from bancsynk.adapters.btg.auth import BTGAuth
+    monkeypatch.setenv("BTG_CLIENT_ID", "client-123")
+    monkeypatch.setenv("BANCSYNC_208_1_CLIENT_ID", "btg-client")
+    with pytest.raises(ValueError):
+        get_authorize_url("")
+    with pytest.raises(ValueError):
+        BancSynk().gerar_url_consentimento(
+            "208", company_id=1, redirect_uri="https://localhost.com", scope="openid")
+    with pytest.raises(ValueError):
+        BTGAuth(company_id="1").get_authorize_url()

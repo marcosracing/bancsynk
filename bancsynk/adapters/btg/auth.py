@@ -75,11 +75,54 @@ BTG_REDIRECT_URI = os.environ.get("BTG_REDIRECT_URI", "https://localhost.com")
 # No sandbox o companyId (CNPJ) e fixo.
 SANDBOX_COMPANY_ID = "30306294000145"
 
+# Enderecos por ambiente, usados quando as credenciais sao injetadas (cofre).
+_ENDERECOS = {
+    "sandbox": {
+        "base": "https://api.sandbox.empresas.btgpactual.com",
+        "token": "https://id.sandbox.btgpactual.com/oauth2/token",
+        "authorize": "https://id.sandbox.btgpactual.com/oauth2/authorize",
+    },
+    "producao": {
+        "base": "https://api.empresas.btgpactual.com",
+        "token": "https://id.btgpactual.com/oauth2/token",
+        "authorize": "https://id.btgpactual.com/oauth2/authorize",
+    },
+}
+_SCOPE_PADRAO = "openid empresas.btgpactual.com/accounts.readonly"
+
+
+def validar_url_btg(url: str, permitir_local: bool = False) -> str:
+    """Recusa URL fora de https://*.btgpactual.com antes de enviar segredo.
+
+    permitir_local: so no modo legado (sem cofre), aceita loopback para os mocks de teste.
+    """
+    from urllib.parse import urlsplit
+
+    try:
+        partes = urlsplit(str(url or ""))
+        host = (partes.hostname or "").lower()
+    except ValueError:
+        partes = None
+        host = ""
+    if permitir_local and partes is not None and host in ("127.0.0.1", "localhost", "::1"):
+        return url
+    if (
+        partes is None
+        or partes.scheme != "https"
+        or partes.username is not None
+        or partes.password is not None
+        or not (host == "btgpactual.com" or host.endswith(".btgpactual.com"))
+    ):
+        raise PermissionError("BTG 208: endereco recusado (somente https em btgpactual.com).")
+    return url
+
 
 class BTGAuth:
     """Autenticacao Authorization Code do BTG (Fase 1 read-only)."""
 
-    def __init__(self, company_id: Optional[str] = None) -> None:
+    def __init__(self, company_id: Optional[str] = None, credenciais=None) -> None:
+        # credenciais: objeto com get(campo) e save(campo, valor) (cofre do chamador).
+        self.credenciais = credenciais
         self.company_id: Optional[str] = (
             str(company_id) if company_id is not None else None
         )
@@ -91,6 +134,8 @@ class BTGAuth:
     def _resolve_company(self) -> Optional[str]:
         if self.company_id:
             return self.company_id
+        if self.credenciais is not None:
+            return None  # com cofre injetado nao varre o ambiente do processo
         prefix = f"BANCSYNC_{BANCO_CODIGO}_"
         for key in os.environ:
             if key.startswith(prefix) and key.endswith("_CLIENT_ID"):
@@ -100,7 +145,17 @@ class BTGAuth:
         return None
 
     # ── Leitura/escrita de configuracao ─────────────────────────────────────
+    @property
+    def ambiente(self) -> str:
+        if self.credenciais is None:
+            return BTG_ENV
+        valor = str(self.credenciais.get("AMBIENTE") or "").strip().lower()
+        return "producao" if valor == "producao" else "sandbox"
+
     def config_value(self, campo: str, default: str = "") -> str:
+        if self.credenciais is not None:
+            # Cofre injetado: le so dele, sem variaveis de ambiente nem arquivo local.
+            return str(self.credenciais.get(campo) or default)
         from bancsynk.config import get_credential
 
         cid = self._resolve_company()
@@ -112,6 +167,9 @@ class BTGAuth:
         return os.environ.get(legacy_key, default)
 
     def _save_cred(self, campo: str, valor: str) -> None:
+        if self.credenciais is not None:
+            self.credenciais.save(campo, valor)
+            return
         from bancsynk.config import save_credential
 
         cid = self._resolve_company()
@@ -146,23 +204,33 @@ class BTGAuth:
 
     @property
     def base_url(self) -> str:
+        if self.credenciais is not None:
+            return _ENDERECOS[self.ambiente]["base"]
         return self.config_value("BASE_URL", BTG_BASE_URL)
 
     @property
     def auth_url(self) -> str:
+        if self.credenciais is not None:
+            return _ENDERECOS[self.ambiente]["token"]
         return self.config_value("AUTH_URL", BTG_AUTH_URL)
 
     @property
     def authorize_url(self) -> str:
+        if self.credenciais is not None:
+            return _ENDERECOS[self.ambiente]["authorize"]
         return self.config_value("AUTHORIZE_URL", BTG_AUTHORIZE_URL)
 
     @property
     def scope(self) -> str:
-        return self.config_value("SCOPE", BTG_SCOPE_DEFAULT)
+        return self.config_value(
+            "SCOPE", _SCOPE_PADRAO if self.credenciais is not None else BTG_SCOPE_DEFAULT
+        )
 
     @property
     def redirect_uri(self) -> str:
-        return self.config_value("REDIRECT_URI", BTG_REDIRECT_URI)
+        return self.config_value(
+            "REDIRECT_URI", "" if self.credenciais is not None else BTG_REDIRECT_URI
+        )
 
     @property
     def cert(self) -> Optional[Tuple[str, str]]:
@@ -185,15 +253,17 @@ class BTGAuth:
             raise EnvironmentError(
                 "BTG 208: CLIENT_ID nao configurado — usar tela 8.5.0 BancSynk."
             )
+        if not state:
+            # Sem state o code de volta não se amarra a quem pediu (CSRF).
+            raise ValueError("BTG 208: state obrigatorio no consentimento OAuth.")
         params = {
             "client_id": self.client_id,
             "response_type": "code",
             "scope": self.scope,
             "redirect_uri": self.redirect_uri,
+            "state": state,
         }
-        if state:
-            params["state"] = state
-        return f"{self.authorize_url}?{urlencode(params)}"
+        return f"{validar_url_btg(self.authorize_url, self.credenciais is None)}?{urlencode(params)}"
 
     # ── Authorization Code: troca de code por tokens ────────────────────────
     def exchange_code(self, code: str) -> dict:
@@ -201,9 +271,10 @@ class BTGAuth:
             raise EnvironmentError(
                 "BTG 208: CLIENT_ID/CLIENT_SECRET ausentes no .env."
             )
+        url = validar_url_btg(self.auth_url, self.credenciais is None)  # antes de enviar secret e code
         log.info("BTG 208: trocando authorization code por tokens")
         resp = requests.post(
-            self.auth_url,
+            url,
             headers={
                 "Authorization": self._basic_auth_header(),
                 "Content-Type": "application/x-www-form-urlencoded",
@@ -217,11 +288,8 @@ class BTGAuth:
             timeout=20,
         )
         if resp.status_code != 200:
-            log.error(
-                "BTG exchange_code falhou: %s %s",
-                resp.status_code,
-                resp.text[:200],
-            )
+            # Sem corpo da resposta no log: pode trazer token ou code.
+            log.error("BTG exchange_code falhou: HTTP %s", resp.status_code)
         resp.raise_for_status()
         tokens = resp.json() or {}
         self._store_tokens(tokens)
@@ -232,9 +300,10 @@ class BTGAuth:
         rt = self.refresh_token
         if not rt or not self.client_id or not self.client_secret:
             return False
+        url = validar_url_btg(self.auth_url, self.credenciais is None)  # PermissionError fora do try
         try:
             resp = requests.post(
-                self.auth_url,
+                url,
                 headers={
                     "Authorization": self._basic_auth_header(),
                     "Content-Type": "application/x-www-form-urlencoded",
@@ -247,7 +316,7 @@ class BTGAuth:
             self._store_tokens(resp.json() or {})
             return True
         except Exception as exc:  # pragma: no cover - depende de rede
-            log.warning("BTG refresh_token falhou: %s", exc)
+            log.warning("BTG refresh_token falhou: %s", type(exc).__name__)
             return False
 
     def _store_tokens(self, tokens: dict) -> None:
@@ -285,8 +354,10 @@ class BTGAuth:
     def _resolve_path(self, path: str) -> str:
         if "{companyId}" not in path:
             return path
-        if BTG_ENV == "sandbox":
+        if self.ambiente == "sandbox":
             company = SANDBOX_COMPANY_ID
+        elif self.credenciais is not None:
+            company = str(self.credenciais.get("COMPANY_CNPJ") or "")
         else:
             company = os.environ.get(
                 f"BTG_COMPANY_{self._resolve_company()}_CNPJ", self._resolve_company() or ""
@@ -294,12 +365,16 @@ class BTGAuth:
         return path.replace("{companyId}", company)
 
     def request(self, method: str, path: str, **kwargs) -> requests.Response:
+        validar_url_btg(self.base_url, self.credenciais is None)  # antes de obter ou renovar o token
         token = self.get_token()
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {token}"
+        url = validar_url_btg(
+            f"{self.base_url}{self._resolve_path(path)}", self.credenciais is None
+        )
         return requests.request(
             method,
-            f"{self.base_url}{self._resolve_path(path)}",
+            url,
             headers=headers,
             cert=self.cert,
             timeout=30,
@@ -322,7 +397,7 @@ class BTGAuth:
         base = {
             "banco": BANCO_CODIGO,
             "company_id": cid,
-            "env": BTG_ENV,
+            "env": self.ambiente,
             "base_url": self.base_url,
             "cert_configured": self.cert is not None,
         }
@@ -345,10 +420,7 @@ class BTGAuth:
                     "Authorization Code."
                 ),
             }
-            try:
-                result["authorize_url"] = self.get_authorize_url()
-            except Exception:
-                pass
+            # Sem URL de consentimento aqui: ela exige o state de quem a pede.
             return result
         return {
             **base,

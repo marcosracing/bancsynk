@@ -16,15 +16,22 @@ class BTGReadOnlyAdapter(BankAdapter):
     banco_nome = "BTG Pactual"
     read_only = True
 
-    def __init__(self, company_id: Optional[str] = None, auth: BTGAuth | None = None) -> None:
+    def __init__(
+        self,
+        company_id: Optional[str] = None,
+        auth: BTGAuth | None = None,
+        credenciais=None,
+    ) -> None:
         self.company_id: Optional[str] = str(company_id) if company_id is not None else None
-        self.auth = auth or BTGAuth(company_id=self.company_id)
+        self.auth = auth or BTGAuth(company_id=self.company_id, credenciais=credenciais)
 
     def auth_check(self) -> dict:
         return self.auth.check()
 
-    def get_contas(self) -> list:
-        data = self.auth.get("/{companyId}/banking/accounts")
+    def get_contas(self, origem: Optional[str] = None) -> list:
+        # origem="OPEN_FINANCE": contas de outras instituicoes ligadas ao BTG.
+        params = {"accountOrigin": origem} if origem else None
+        data = self.auth.get("/{companyId}/banking/accounts", params=params)
         if isinstance(data, list):
             rows: list = []
             for item in data:

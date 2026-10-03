@@ -39,11 +39,16 @@ class BancSynk:
         self._adapters["santander"] = adapter
         log.info("BancSynk: adaptador Santander registrado em modo read-only")
 
-    def get_adapter(self, banco: str, company_id=None) -> BankAdapter:
+    def get_adapter(self, banco: str, company_id=None, credenciais=None) -> BankAdapter:
         code = banco.lower().strip()
         if code not in self._adapters:
             raise ValueError(f"Banco '{banco}' nao configurado no BancSynk")
         adapter = self._adapters[code]
+        if credenciais is not None:
+            # Credenciais injetadas: so o adaptador BTG as aceita.
+            if not isinstance(adapter, BTGReadOnlyAdapter):
+                raise ValueError(f"Banco '{banco}' nao aceita credenciais injetadas")
+            return BTGReadOnlyAdapter(company_id=company_id, credenciais=credenciais)
         if company_id is not None:
             cls = type(adapter)
             try:
@@ -106,13 +111,17 @@ class BancSynk:
         return str(banco).lower().strip() in {"208", "btg"}
 
     def gerar_url_consentimento(
-        self, banco: str, company_id, redirect_uri: str, scope: str
+        self, banco: str, company_id, redirect_uri: str, scope: str,
+        state: str = "",
     ) -> str:
+        if not state:
+            # Sem state o code de volta não se amarra a quem pediu (CSRF).
+            raise ValueError("state obrigatorio no consentimento OAuth.")
         if self._is_santander(banco):
             from bancsynk.adapters.santander.auth import SantanderAuth
 
             return SantanderAuth(company_id=company_id).build_authorize_url(
-                redirect_uri=redirect_uri, scope=scope or None
+                redirect_uri=redirect_uri, scope=scope or None, state=state
             )
 
         from bancsynk.config import env_key, get_all_env, get_credential
@@ -133,6 +142,7 @@ class BancSynk:
             "response_type": "code",
             "scope": scope,
             "redirect_uri": redirect_uri,
+            "state": state,
         }
         return f"{authorize_url}?{urlencode(params)}"
 

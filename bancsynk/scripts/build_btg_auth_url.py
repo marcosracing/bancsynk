@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import secrets
 import sys
 from pathlib import Path
 
@@ -19,11 +20,14 @@ from bancsynk.adapters.btg.auth import BTGAuth
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--company-id", default="1", help="Company id no BancSynk (default: 1)")
-    parser.add_argument("--state", default=None, help="Parametro state OAuth2 opcional")
+    parser.add_argument("--state", default=None,
+                        help="Parametro state OAuth2 (gerado se omitido)")
     args = parser.parse_args()
+    state = args.state or secrets.token_urlsafe(32)
 
     auth = BTGAuth(company_id=args.company_id)
-    url = auth.get_authorize_url(state=args.state)
+    url = auth.get_authorize_url(state=state)
+    print(f"state: {state} (confira que volta igual no redirect)")
 
     print("=== URL DE CONSENTIMENTO BTG ===")
     print(url)

@@ -19,7 +19,9 @@ DEFAULT_SCOPE = (
 )
 
 
-def get_authorize_url() -> str:
+def get_authorize_url(state: str) -> str:
+    if not state:
+        raise ValueError("state obrigatorio no consentimento OAuth.")
     authorize_url = os.environ.get(
         "BTG_AUTHORIZE_URL",
         "https://id.sandbox.btgpactual.com/oauth2/authorize",
@@ -30,6 +32,7 @@ def get_authorize_url() -> str:
         "redirect_uri": os.environ.get("BTG_REDIRECT_URI", "https://localhost.com"),
         "scope": os.environ.get("BTG_SCOPE") or DEFAULT_SCOPE,
         "prompt": "login",
+        "state": state,
     }
     return f"{authorize_url}?{urlencode(params)}"
 
